@@ -1,82 +1,167 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-    <title>Jood Key </title>
+    <meta charset="UTF-8">
+    <title>Jood Key</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; display: flex; justify-content: center; padding-top: 50px; }
-        .card { background: #1e1e1e; padding: 30px; border-radius: 15px; width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #333; }
-        h2 { text-align: center; color: #4CAF50; margin-bottom: 25px; }
-        select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; }
-        select { background: #333; color: white; }
-        button { background: #4CAF50; color: white; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #45a049; transform: translateY(-2px); }
-        #result { background: #000; padding: 15px; border-radius: 8px; margin-top: 20px; word-break: break-all; color: #00ff00; font-family: 'Courier New', Courier, monospace; border: 1px dashed #4CAF50; display: none; }
+        :root {
+            --primary: #4CAF50;
+            --bg: #0f0f0f;
+            --card: #1a1a1a;
+            --text: #ececec;
+            --danger: #ff4d4d;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 600px; padding: 20px; }
+        .card { background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 1px solid #222; }
+        
+        /* Minimal Inputs */
+        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px; border: 1px solid #333; background: #222; color: white; font-size: 15px; box-sizing: border-box; outline: none; }
+        button { background: var(--primary); border: none; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        button:hover { opacity: 0.8; transform: translateY(-1px); }
+        .btn-danger { background: var(--danger); }
+        .btn-outline { background: transparent; border: 1px solid #444; margin-top: 20px; }
+
+        /* Login Screen */
+        #login-screen { display: flex; flex-direction: column; text-align: center; }
+        
+        /* Dashboard Screen */
+        #dashboard { display: none; }
+        h2 { margin-top: 0; font-weight: 400; letter-spacing: 1px; }
+
+        /* Key List Table */
+        .key-list { margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
+        .key-item { background: #252525; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .key-info b { color: var(--primary); display: block; font-size: 16px; }
+        .key-info span { color: #888; font-size: 12px; }
+        .actions { display: flex; gap: 5px; }
+        .actions button { width: auto; padding: 6px 12px; font-size: 12px; margin: 0; }
+        
+        #result-popup { background: #000; padding: 10px; border-radius: 8px; margin-top: 10px; color: var(--primary); font-family: monospace; display: none; text-align: center; border: 1px solid var(--primary); }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>Key System</h2>
-        <label>เลือกอายุการใช้งาน:</label>
-        <select id="duration">
-            <option value="1">1 วัน (24 ชั่วโมง)</option>
-            <option value="7">7 วัน (1 สัปดาห์)</option>
-            <option value="30">30 วัน (1 เดือน)</option>
-        </select>
-        <button id="genBtn" onclick="generateAndSave()">สร้างและบันทึกไป Firebase</button>
-        <div id="result"></div>
+
+<div class="container">
+    <div id="login-screen" class="card">
+        <h2>ADMIN LOGIN</h2>
+        <input type="password" id="adminPass" placeholder="กรอกรหัสผ่านแอดมิน">
+        <button onclick="checkLogin()">เข้าสู่ระบบ</button>
     </div>
 
-    <script>
-        // --- แก้ไขข้อมูลของคุณตรงนี้ ---
-        const DB_URL = "https://jood-af2d8-default-rtdb.asia-southeast1.firebasedatabase.app/keys";
-        const DB_SECRET = "JXRzMTiI2hQo9rps823i8guY5y14fxWPUeFDO5oU"; 
+    <div id="dashboard" class="card">
+        <h2>KEY GENERATOR</h2>
+        <select id="duration">
+            <option value="1">1 วัน</option>
+            <option value="7">7 วัน</option>
+            <option value="30">30 วัน</option>
+        </select>
+        <button id="genBtn" onclick="generateAndSave()">สร้าง Key ใหม่</button>
+        <div id="result-popup"></div>
 
-        function makeid(length) {
-            let result = 'JOOD-';
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
-                if (i === 3) result += '-';
-            }
-            return result;
+        <div class="key-list">
+            <h3>Keys ในระบบ</h3>
+            <div id="list-container">กำลังโหลด...</div>
+        </div>
+        
+        <button class="btn-outline" onclick="location.reload()">ออกจากระบบ</button>
+    </div>
+</div>
+
+<script>
+    const DB_URL = "https://jood-af2d8-default-rtdb.asia-southeast1.firebasedatabase.app/keys";
+    const DB_SECRET = "JXRzMTiI2hQo9rps823i8guY5y14fxWPUeFDO5oU";
+    const ADMIN_PASSWORD = "2012"; // เปลี่ยนรหัสผ่านตรงนี้
+
+    function checkLogin() {
+        const pass = document.getElementById('adminPass').value;
+        if (pass === ADMIN_PASSWORD) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            fetchKeys();
+        } else {
+            alert("รหัสผ่านไม่ถูกต้อง!");
         }
+    }
 
-        async function generateAndSave() {
-            const btn = document.getElementById('genBtn');
-            const resDiv = document.getElementById('result');
-            const days = document.getElementById('duration').value;
-            
-            btn.disabled = true;
-            btn.innerText = "กำลังบันทึก...";
-
-            const newKey = makeid(8);
-            const expiryTimestamp = Math.floor(Date.now() / 1000) + (days * 24 * 60 * 60);
-
-            const url = `${DB_URL}/${newKey}.json?auth=${DB_SECRET}`;
-
-            try {
-                const response = await fetch(url, {
-                    method: 'PUT', // ใช้ PUT เพื่อสร้าง Node ใหม่ตามชื่อ Key
-                    body: JSON.stringify({
-                        expiry: expiryTimestamp,
-                        duration: days + " Days",
-                        created_at: new Date().toLocaleString()
-                    })
-                });
-
-                if (response.ok) {
-                    resDiv.style.display = "block";
-                    resDiv.innerText = `สร้างสำเร็จ!\nKey: ${newKey}\nหมดอายุ: ${new Date(expiryTimestamp * 1000).toLocaleString()}`;
-                } else {
-                    alert("เกิดข้อผิดพลาดในการเชื่อมต่อ Firebase");
-                }
-            } catch (err) {
-                alert("Error: " + err);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "สร้างและบันทึกไป Firebase";
-            }
+    function makeid(length) {
+        let result = 'JOOD-';
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+            if (i === 3) result += '-';
         }
-    </script>
+        return result;
+    }
+
+    // ดึงข้อมูล Key ทั้งหมดมาโชว์
+    async function fetchKeys() {
+        const container = document.getElementById('list-container');
+        try {
+            const response = await fetch(`${DB_URL}.json?auth=${DB_SECRET}`);
+            const data = await response.json();
+            container.innerHTML = "";
+
+            if (!data) {
+                container.innerHTML = "ไม่พบ Key ในระบบ";
+                return;
+            }
+
+            for (let key in data) {
+                const item = data[key];
+                const dateStr = new Date(item.expiry * 1000).toLocaleDateString();
+                
+                const div = document.createElement('div');
+                div.className = 'key-item';
+                div.innerHTML = `
+                    <div class="key-info">
+                        <b>${key}</b>
+                        <span>หมดอายุ: ${dateStr}</span>
+                    </div>
+                    <div class="actions">
+                        <button onclick="addTime('${key}', ${item.expiry})">+1 วัน</button>
+                        <button class="btn-danger" onclick="deleteKey('${key}')">ลบ</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+        } catch (e) { container.innerHTML = "โหลดข้อมูลล้มเหลว"; }
+    }
+
+    async function generateAndSave() {
+        const days = document.getElementById('duration').value;
+        const newKey = makeid(8);
+        const expiry = Math.floor(Date.now() / 1000) + (days * 24 * 60 * 60);
+
+        await fetch(`${DB_URL}/${newKey}.json?auth=${DB_SECRET}`, {
+            method: 'PUT',
+            body: JSON.stringify({ expiry: expiry, duration: days + " Days" })
+        });
+        
+        const res = document.getElementById('result-popup');
+        res.innerText = "สร้างสำเร็จ: " + newKey;
+        res.style.display = "block";
+        setTimeout(() => res.style.display = "none", 3000);
+        
+        fetchKeys();
+    }
+
+    async function addTime(key, currentExpiry) {
+        const newExpiry = currentExpiry + (24 * 60 * 60); // เพิ่ม 1 วัน
+        await fetch(`${DB_URL}/${key}/expiry.json?auth=${DB_SECRET}`, {
+            method: 'PUT',
+            body: JSON.stringify(newExpiry)
+        });
+        fetchKeys();
+    }
+
+    async function deleteKey(key) {
+        if (confirm("ยืนยันการลบ Key: " + key)) {
+            await fetch(`${DB_URL}/${key}.json?auth=${DB_SECRET}`, { method: 'DELETE' });
+            fetchKeys();
+        }
+    }
+</script>
+
 </body>
 </html>
