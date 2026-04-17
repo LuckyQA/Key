@@ -3,154 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JOOD | Premium Admin</title>
+    <title>Jood Admin Premium</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
         
         :root {
-            --bg: #ffffff;
-            --surface: #f8f9fa;
-            --primary: #000000;
-            --accent: #007aff;
-            --danger: #ff3b30;
-            --border: rgba(0, 0, 0, 0.08);
-            --shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+            --bg: #0f172a;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary-gradient: linear-gradient(135deg, #38bdf8, #818cf8);
+            --accent: #38bdf8;
+            --danger: #ff4757;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
         }
 
         body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: var(--bg); 
-            color: var(--primary); 
+            font-family: 'Inter', sans-serif; 
+            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            color: var(--text-main); 
             margin: 0; 
+            min-height: 100vh;
             display: flex; 
             justify-content: center; 
             padding: 20px;
             -webkit-font-smoothing: antialiased;
         }
 
-        .container { width: 100%; max-width: 420px; margin-top: 40px; }
+        .container { width: 100%; max-width: 480px; }
         
-        /* Premium Minimal Card */
+        /* Glassmorphism Card */
         .card { 
-            background: var(--surface); 
-            padding: 32px; 
-            border-radius: 28px; 
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
+            background: var(--glass-bg); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 28px; 
+            border-radius: 24px; 
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             margin-bottom: 24px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; height: 4px;
-            background: linear-gradient(90deg, #000, #444);
-            opacity: 0.8;
+            transition: transform 0.3s ease;
         }
 
         h2 { 
-            font-weight: 800; 
-            letter-spacing: -1px; 
+            font-weight: 500; 
+            letter-spacing: -0.02em; 
             margin-bottom: 24px; 
-            text-align: left; 
-            font-size: 24px; 
-            text-transform: uppercase;
+            text-align: center; 
+            font-size: 22px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #888; margin-left: 4px; }
+        .label-small {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
         input, select { 
             width: 100%; 
-            background: #fff; 
-            border: 1px solid var(--border);
-            padding: 14px 18px; 
-            border-radius: 16px; 
-            color: var(--primary); 
-            margin: 8px 0 16px 0;
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid var(--glass-border);
+            padding: 14px; 
+            border-radius: 12px; 
+            color: #fff; 
+            margin-bottom: 16px;
             font-size: 16px;
             box-sizing: border-box;
             outline: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
         }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(0,0,0,0.03); }
+        input:focus { 
+            border-color: var(--accent); 
+            background: rgba(255,255,255,0.08);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+        }
 
         button { 
             width: 100%; 
-            padding: 16px; 
-            border-radius: 16px; 
+            padding: 14px; 
+            border-radius: 12px; 
             border: none; 
-            font-weight: 700; 
+            font-weight: 600; 
             cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-main { 
+            background: var(--primary-gradient); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+        .btn-main:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-main:active { transform: scale(0.97); }
+
+        /* Key Item Styling */
+        .key-item { 
+            background: rgba(255,255,255,0.02);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--glass-border);
             transition: all 0.3s ease;
-            font-size: 14px;
+        }
+        .key-item:hover {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .key-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px; 
+        }
+        .key-name { 
+            font-weight: 600; 
+            font-size: 16px; 
+            color: #fff;
             letter-spacing: 0.5px;
         }
-
-        .btn-main { background: var(--primary); color: white; }
-        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        .btn-main:active { transform: scale(0.96); }
-
-        /* Key List Styling - Cool List */
-        .key-item { 
-            background: #fff;
-            padding: 20px;
-            border-radius: 24px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border);
-            transition: transform 0.3s ease;
-        }
-        .key-item:hover { transform: scale(1.02); }
-
-        .key-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .key-name { font-weight: 800; font-size: 16px; letter-spacing: -0.5px; }
         .countdown { 
-            font-size: 11px; 
-            color: white; 
-            background: var(--primary);
+            font-size: 13px; 
+            color: var(--accent); 
+            background: rgba(56, 189, 248, 0.1);
             padding: 4px 10px;
             border-radius: 20px;
-            font-weight: 700; 
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Control Group Layout */
-        .control-group { display: flex; gap: 6px; align-items: center; }
-        .input-mini { width: 60px !important; margin: 0 !important; padding: 10px !important; text-align: center; font-weight: 700; border-radius: 12px !important; }
+        /* Mobile Friendly Controls */
+        .control-group { display: flex; gap: 10px; align-items: center; }
+        .input-mini { 
+            width: 60px !important; 
+            margin: 0 !important; 
+            padding: 8px !important; 
+            text-align: center; 
+            font-size: 14px !important; 
+            border-radius: 8px;
+        }
         
-        .btn-tool { width: auto; flex: 1; padding: 12px; background: #fff; color: var(--primary); border: 1px solid var(--border); border-radius: 12px; font-size: 11px; }
-        .btn-tool:hover { background: #000; color: #fff; }
-        .btn-del { color: var(--danger); border: 1px solid rgba(255, 59, 48, 0.1); background: rgba(255, 59, 48, 0.03); }
-        .btn-del:hover { background: var(--danger); color: white; border-color: var(--danger); }
+        .btn-tool { 
+            width: auto; 
+            flex: 1; 
+            padding: 10px; 
+            background: rgba(255,255,255,0.05); 
+            color: var(--text-main); 
+            border: 1px solid var(--glass-border); 
+            font-size: 13px;
+        }
+        .btn-tool:hover { background: rgba(255,255,255,0.1); }
+        
+        .btn-del { 
+            color: var(--danger); 
+            border-color: rgba(255, 71, 87, 0.2); 
+            background: rgba(255, 71, 87, 0.05); 
+        }
+        .btn-del:hover { background: var(--danger); color: white; }
 
-        #toast { display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #000; color: #fff; padding: 12px 28px; border-radius: 50px; font-size: 13px; font-weight: 600; z-index: 1000; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        #toast { 
+            display: none; 
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: #fff; 
+            color: #000; 
+            padding: 12px 24px; 
+            border-radius: 16px; 
+            font-size: 14px; 
+            font-weight: 600;
+            z-index: 1000; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translate(-50%, 20px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
-<div id="toast">SYSTEM UPDATED</div>
+<div id="toast">บันทึกเรียบร้อย</div>
 
 <div class="container">
     <div id="login-screen" class="card">
-        <h2>Auth System</h2>
-        <label>Access Code</label>
-        <input type="password" id="adminPass" placeholder="••••">
-        <button class="btn-main" onclick="checkLogin()">IDENTIFY</button>
+        <h2>JOOD PANEL</h2>
+        <span class="label-small">Security Access</span>
+        <input type="password" id="adminPass" placeholder="Enter Admin Password">
+        <button class="btn-main" onclick="checkLogin()">Authenticate</button>
     </div>
 
     <div id="dashboard" style="display:none;">
         <div class="card">
-            <h2>Generate</h2>
-            <label>Validity Period</label>
+            <h2>Management</h2>
+            <span class="label-small">License Duration</span>
             <select id="duration">
-                <option value="1">1 DAY ACCESS</option>
-                <option value="7">7 DAYS ACCESS</option>
-                <option value="30">30 DAYS ACCESS</option>
+                <option value="1">1 Day Access</option>
+                <option value="7">7 Days Access</option>
+                <option value="30">30 Days Access</option>
             </select>
-            <button class="btn-main" onclick="generateAndSave()">CREATE NEW KEY</button>
+            <button class="btn-main" onclick="generateAndSave()">
+                <span>+</span> Create New Key
+            </button>
         </div>
 
-        <div id="list-container"></div>
+        <div id="list-container">
+            </div>
     </div>
 </div>
 
@@ -166,13 +237,16 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             startDataSync();
-        } else { alert("ACCESS DENIED"); }
+        } else { 
+            alert("Password Incorrect"); 
+        }
     }
 
     function showToast(msg) {
         const t = document.getElementById('toast');
-        t.innerText = msg; t.style.display = 'block';
-        setTimeout(() => t.style.display = 'none', 2000);
+        t.innerText = msg; 
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 2500);
     }
 
     function getCountdown(expiry) {
@@ -183,7 +257,7 @@
         const h = Math.floor((diff % 86400) / 3600);
         const m = Math.floor((diff % 3600) / 60);
         const s = diff % 60;
-        return `${d}D ${h}H ${m}M ${s}S`;
+        return `${d}d ${h}h ${m}m ${s}s`;
     }
 
     async function fetchKeys() {
@@ -191,7 +265,7 @@
             const res = await fetch(`${DB_URL}.json?auth=${DB_SECRET}`);
             allKeys = await res.json() || {};
             renderList();
-        } catch (e) { console.error("Fetch Error"); }
+        } catch (e) { console.error("Sync Error"); }
     }
 
     function renderList() {
@@ -199,7 +273,9 @@
         container.innerHTML = "";
         const now = Math.floor(Date.now() / 1000);
 
-        for (let id in allKeys) {
+        const sortedKeys = Object.keys(allKeys).reverse();
+
+        for (let id of sortedKeys) {
             const item = allKeys[id];
             if (item.expiry <= now) {
                 deleteKey(id, true);
@@ -215,9 +291,9 @@
                 </div>
                 <div class="control-group">
                     <input type="number" class="input-mini" id="val-${id}" value="1">
-                    <button class="btn-tool" onclick="updateTime('${id}', ${item.expiry}, 'add')">ADD</button>
-                    <button class="btn-tool" onclick="updateTime('${id}', ${item.expiry}, 'sub')">SUB</button>
-                    <button class="btn-tool btn-del" onclick="deleteKey('${id}')">DEL</button>
+                    <button class="btn-tool" onclick="updateTime('${id}', ${item.expiry}, 'add')">Add</button>
+                    <button class="btn-tool" onclick="updateTime('${id}', ${item.expiry}, 'sub')">Sub</button>
+                    <button class="btn-tool btn-del" onclick="deleteKey('${id}')">Remove</button>
                 </div>
             `;
             container.appendChild(div);
@@ -237,7 +313,7 @@
 
     async function startDataSync() {
         await fetchKeys();
-        setInterval(fetchKeys, 8000);
+        setInterval(fetchKeys, 10000);
     }
 
     async function generateAndSave() {
@@ -249,7 +325,7 @@
             method: 'PUT',
             body: JSON.stringify({ expiry: expiry })
         });
-        showToast("NEW KEY CREATED");
+        showToast("Key Generated Successfully");
         fetchKeys();
     }
 
@@ -261,14 +337,14 @@
             method: 'PUT',
             body: JSON.stringify(newExpiry)
         });
-        showToast("DATA UPDATED");
+        showToast("Time Updated");
         fetchKeys();
     }
 
     async function deleteKey(key, silent = false) {
-        if (!silent && !confirm("PERMANENTLY DELETE " + key + "?")) return;
+        if (!silent && !confirm("Permanently delete " + key + "?")) return;
         await fetch(`${DB_URL}/${key}.json?auth=${DB_SECRET}`, { method: 'DELETE' });
-        if (!silent) showToast("KEY REMOVED");
+        if (!silent) showToast("Key Revoked");
         fetchKeys();
     }
 </script>
