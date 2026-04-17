@@ -6,6 +6,7 @@
     <title>JOOD Admin Minimal</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap');
         
         :root {
             --bg: #0b0f1a;
@@ -102,7 +103,6 @@
             pointer-events: auto;
         }
 
-        /* Generic Inputs */
         input {
             width: 100%; background: var(--input-bg); border: 1px solid var(--border);
             padding: 14px 18px; border-radius: 16px; color: #fff; font-size: 15px;
@@ -125,8 +125,8 @@
             border-radius: 22px; padding: 20px; margin-bottom: 12px;
         }
         .key-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .key-id { font-family: monospace; font-weight: 600; }
-        .key-timer { font-size: 12px; color: var(--accent); }
+        .key-id { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 15px; color: #fff; }
+        .key-timer { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); background: rgba(99, 102, 241, 0.1); padding: 4px 10px; border-radius: 8px; }
 
         .actions { display: grid; grid-template-columns: 1fr 1fr 1fr 44px; gap: 8px; }
         .btn-sm { padding: 8px; border-radius: 10px; font-size: 12px; background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid var(--border); }
@@ -179,18 +179,13 @@
     let currentDuration = 1;
     let allKeys = {};
 
-    // Dropdown Logic
-    function toggleDropdown() {
-        document.getElementById("dropdown-items").classList.toggle("select-show");
-    }
-
+    function toggleDropdown() { document.getElementById("dropdown-items").classList.toggle("select-show"); }
     function setDuration(val, text) {
         currentDuration = val;
         document.getElementById("selected-val").innerText = text;
         document.getElementById("dropdown-items").classList.remove("select-show");
     }
 
-    // Close dropdown when clicking outside
     window.onclick = function(event) {
         if (!event.target.matches('.select-selected')) {
             document.getElementById("dropdown-items").classList.remove("select-show");
@@ -212,23 +207,35 @@
     }
 
     function getCountdown(expiry) {
-        const diff = expiry - Math.floor(Date.now() / 1000);
+        const now = Math.floor(Date.now() / 1000);
+        const diff = expiry - now;
         if (diff <= 0) return "EXPIRED";
-        const d = Math.floor(diff / 86400), h = Math.floor((diff % 86400) / 3600), m = Math.floor((diff % 3600) / 60);
-        return `${d}d ${h}h ${m}m`;
+        
+        const d = Math.floor(diff / 86400);
+        const h = Math.floor((diff % 86400) / 3600);
+        const m = Math.floor((diff % 3600) / 60);
+        const s = diff % 60;
+        
+        let res = "";
+        if (d > 0) res += d + "d ";
+        res += `${h}h ${m}m ${s}s`;
+        return res;
     }
 
     async function fetchKeys() {
         try {
             const res = await fetch(`${DB_URL}.json?auth=${DB_SECRET}`);
-            allKeys = await res.json() || {};
+            const data = await res.json() || {};
+            allKeys = data;
             renderList();
         } catch (e) {}
     }
 
     function renderList() {
         const container = document.getElementById('list-container');
+        const scrollPos = window.scrollY;
         container.innerHTML = "";
+        
         Object.keys(allKeys).reverse().forEach(id => {
             const item = allKeys[id];
             const div = document.createElement('div');
@@ -247,6 +254,18 @@
             container.appendChild(div);
         });
     }
+
+    // Update Countdown every 1 second
+    setInterval(() => {
+        for (let id in allKeys) {
+            const el = document.getElementById(`timer-${id}`);
+            if (el) {
+                const timeStr = getCountdown(allKeys[id].expiry);
+                el.innerText = timeStr;
+                if (timeStr === "EXPIRED") fetchKeys();
+            }
+        }
+    }, 1000);
 
     async function generateAndSave() {
         const key = 'JOOD-' + Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -268,7 +287,7 @@
         if (!silent) showToast("Deleted"); fetchKeys();
     }
 
-    function startDataSync() { fetchKeys(); setInterval(fetchKeys, 15000); }
+    function startDataSync() { fetchKeys(); setInterval(fetchKeys, 20000); }
 </script>
 </body>
 </html>
