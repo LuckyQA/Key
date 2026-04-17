@@ -2,196 +2,105 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JOOD | Advanced Key Manager</title>
+    <title>JOOD | Auto-Sync Key Manager</title>
     <style>
-        :root {
-            --bg: #0b0f1a;
-            --card-bg: #161b2a;
-            --text: #e2e8f0;
-            --primary: #3b82f6;
-            --danger: #ef4444;
-            --accent: #10b981;
-            --border: #2d3748;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem;
-            margin: 0;
-        }
-
-        .container {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 500px;
-            border: 1px solid var(--border);
-        }
-
-        h2 { text-align: center; color: var(--primary); margin-bottom: 2rem; }
-
-        .section {
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        label { display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: #94a3b8; }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 0.75rem;
-            background: #0b0f1a;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            color: white;
-            box-sizing: border-box;
-            margin-bottom: 1rem;
-        }
-
-        button {
-            width: 100%;
-            padding: 0.8rem;
-            border: none;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-danger { background: var(--danger); color: white; margin-top: 5px; }
-        
-        .key-list {
-            max-height: 200px;
-            overflow-y: auto;
-            background: #0b0f1a;
-            padding: 10px;
-            border-radius: 0.5rem;
-        }
-
-        .key-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-            border-bottom: 1px solid #2d3748;
-            font-size: 0.9rem;
-        }
-
-        .json-output {
-            background: #000;
-            color: #10b981;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            word-break: break-all;
-            margin-top: 10px;
-            font-size: 0.8rem;
-        }
+        :root { --bg: #0b0f1a; --primary: #3b82f6; --accent: #10b981; --text: #e2e8f0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; }
+        .card { background: #161b2a; padding: 2rem; border-radius: 1rem; width: 100%; max-width: 500px; border: 1px solid #2d3748; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2d3748; box-sizing: border-box; }
+        input { background: #0b0f1a; color: white; }
+        button { cursor: pointer; font-weight: bold; border: none; }
+        .btn-gen { background: var(--primary); color: white; }
+        .btn-save { background: var(--accent); color: white; }
+        .status { font-size: 0.8rem; text-align: center; margin-top: 10px; color: #94a3b8; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>JOOD Key Management</h2>
+<div class="card">
+    <h2>JOOD Auto-Sync</h2>
+    
+    <label>GitHub Token (ได้จากข้อ 1)</label>
+    <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx">
+    
+    <hr style="border: 0.5px solid #2d3748; margin: 20px 0;">
 
-    <div class="section">
-        <label>1. วางเนื้อหาจาก keys.json เดิม (ถ้ามี)</label>
-        <textarea id="rawJson" placeholder='{"KEY-1": {"expiry": 123}}' rows="3"></textarea>
-        <button class="btn-primary" style="background:#6366f1" onclick="importJson()">Load Data</button>
-    </div>
+    <label>สร้าง Key ใหม่</label>
+    <select id="duration">
+        <option value="7">7 วัน</option>
+        <option value="30">30 วัน</option>
+    </select>
+    <button class="btn-gen" onclick="generateAndAdd()">+ สร้างและเพิ่มในรายการ</button>
 
-    <div class="section">
-        <label>2. สร้าง Key ใหม่</label>
-        <select id="duration">
-            <option value="7">7 วัน (Weekly)</option>
-            <option value="30">30 วัน (Monthly)</option>
-        </select>
-        <button class="btn-primary" onclick="addKey()">+ Generate & Add</button>
-    </div>
+    <div id="pendingKeys" style="margin-top: 15px; font-size: 0.9rem; color: var(--accent);"></div>
 
-    <div class="section">
-        <label>3. รายการ Key ในระบบ (คลิกลบได้ที่ถังขยะ)</label>
-        <div id="keyList" class="key-list">
-            <p style="text-align:center; color:#4a5568;">ไม่มีข้อมูล</p>
-        </div>
-    </div>
-
-    <div>
-        <label>4. ก๊อปปี้ค่านี้กลับไปเซฟที่ GitHub</label>
-        <div id="finalJson" class="json-output">{}</div>
-        <button class="btn-primary" style="background:var(--accent); margin-top:10px;" onclick="copyResult()">Copy New JSON</button>
-    </div>
+    <button class="btn-save" onclick="syncToGitHub()">บันทึกข้อมูลไปที่ GitHub ทันที</button>
+    <div id="status" class="status">รอการสั่งการ...</div>
 </div>
 
 <script>
     let currentData = {};
+    const REPO_OWNER = "Nattawatwww";
+    const REPO_NAME = "inventory";
+    const FILE_PATH = "keys.json";
 
-    function updateDisplay() {
-        const listDiv = document.getElementById('keyList');
-        const finalJson = document.getElementById('finalJson');
-        listDiv.innerHTML = '';
-
-        if (Object.keys(currentData).length === 0) {
-            listDiv.innerHTML = '<p style="text-align:center; color:#4a5568;">ไม่มีข้อมูล</p>';
-        }
-
-        for (let key in currentData) {
-            const expiry = new Date(currentData[key].expiry * 1000).toLocaleDateString();
-            const item = document.createElement('div');
-            item.className = 'key-item';
-            item.innerHTML = `
-                <span><b>${key}</b> <small>(${expiry})</small></span>
-                <button class="btn-danger" style="width:auto; padding:5px 10px;" onclick="deleteKey('${key}')">ลบ</button>
-            `;
-            listDiv.appendChild(item);
-        }
-
-        finalJson.innerText = JSON.stringify(currentData, null, 2);
-    }
-
-    function importJson() {
-        try {
-            const val = document.getElementById('rawJson').value;
-            currentData = val ? JSON.parse(val) : {};
-            updateDisplay();
-            alert("โหลดข้อมูลสำเร็จ!");
-        } catch(e) {
-            alert("รูปแบบ JSON ไม่ถูกต้อง!");
-        }
-    }
-
-    function addKey() {
+    async function generateAndAdd() {
         const days = parseInt(document.getElementById('duration').value);
         const key = "JOOD-" + Math.random().toString(36).substring(2, 10).toUpperCase();
         const expiry = Math.floor(Date.now() / 1000) + (days * 24 * 60 * 60);
         
+        // ดึงข้อมูลเก่าก่อน (เพื่อให้แน่ใจว่าไม่ทับของเดิมที่อยู่ในเว็บ)
+        document.getElementById('pendingKeys').innerText = "สร้าง Key: " + key + " สำเร็จ (รอการกดบันทึก)";
         currentData[key] = { expiry: expiry };
-        updateDisplay();
     }
 
-    function deleteKey(key) {
-        if (confirm(`ยืนยันการลบ Key: ${key}?`)) {
-            delete currentData[key];
-            updateDisplay();
+    async function syncToGitHub() {
+        const token = document.getElementById('ghToken').value;
+        const status = document.getElementById('status');
+        
+        if (!token) return alert("กรุณาใส่ GitHub Token ก่อน!");
+
+        status.innerText = "กำลังดึงข้อมูลเดิมจาก GitHub...";
+        
+        try {
+            // 1. ดึงไฟล์เดิมมาเพื่อเอา SHA (GitHub บังคับใช้ SHA ในการอัปเดต)
+            const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                headers: { "Authorization": `token ${token}` }
+            });
+            const fileData = await getRes.json();
+            const oldData = JSON.parse(atob(fileData.content));
+            const sha = fileData.sha;
+
+            // 2. รวมข้อมูลใหม่เข้ากับข้อมูลเก่า
+            const newData = { ...oldData, ...currentData };
+
+            status.innerText = "กำลังอัปโหลดข้อมูลใหม่...";
+
+            // 3. ส่งข้อมูลกลับไปที่ GitHub
+            const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `token ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: "Update keys.json via Web Panel",
+                    content: btoa(JSON.stringify(newData, null, 2)),
+                    sha: sha
+                })
+            });
+
+            if (putRes.ok) {
+                status.innerText = "✅ บันทึกไป GitHub สำเร็จแล้ว!";
+                currentData = {}; // ล้างคิวที่รอไว้
+                document.getElementById('pendingKeys').innerText = "";
+            } else {
+                status.innerText = "❌ เกิดข้อผิดพลาดในการบันทึก";
+            }
+        } catch (e) {
+            console.error(e);
+            status.innerText = "❌ เชื่อมต่อ GitHub ไม่ได้";
         }
-    }
-
-    function copyResult() {
-        const text = document.getElementById('finalJson').innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            alert("คัดลอก JSON ใหม่แล้ว! นำไปวางทับในไฟล์ keys.json บน GitHub ได้เลย");
-        });
     }
 </script>
 
