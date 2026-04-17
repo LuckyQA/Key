@@ -2,162 +2,202 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Jood Key</title>
+    <title>Key</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        
         :root {
-            --primary: #4CAF50;
-            --bg: #0f0f0f;
-            --card: #1a1a1a;
-            --text: #ececec;
-            --danger: #ff4d4d;
+            --bg: #0b0b0b;
+            --accent: #ffffff;
+            --secondary: #1a1a1a;
+            --danger: #ff3b30;
+            --text-dim: #888;
         }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 600px; padding: 20px; }
-        .card { background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 1px solid #222; }
-        
-        /* Minimal Inputs */
-        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px; border: 1px solid #333; background: #222; color: white; font-size: 15px; box-sizing: border-box; outline: none; }
-        button { background: var(--primary); border: none; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        button:hover { opacity: 0.8; transform: translateY(-1px); }
-        .btn-danger { background: var(--danger); }
-        .btn-outline { background: transparent; border: 1px solid #444; margin-top: 20px; }
 
-        /* Login Screen */
-        #login-screen { display: flex; flex-direction: column; text-align: center; }
-        
-        /* Dashboard Screen */
-        #dashboard { display: none; }
-        h2 { margin-top: 0; font-weight: 400; letter-spacing: 1px; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg); 
+            color: white; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            padding: 40px 20px;
+        }
 
-        /* Key List Table */
-        .key-list { margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
-        .key-item { background: #252525; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-        .key-info b { color: var(--primary); display: block; font-size: 16px; }
-        .key-info span { color: #888; font-size: 12px; }
-        .actions { display: flex; gap: 5px; }
-        .actions button { width: auto; padding: 6px 12px; font-size: 12px; margin: 0; }
+        .container { width: 100%; max-width: 500px; }
         
-        #result-popup { background: #000; padding: 10px; border-radius: 8px; margin-top: 10px; color: var(--primary); font-family: monospace; display: none; text-align: center; border: 1px solid var(--primary); }
+        /* Minimal Card */
+        .card { 
+            background: rgba(255, 255, 255, 0.03); 
+            padding: 32px; 
+            border-radius: 24px; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h2 { font-weight: 600; letter-spacing: -1px; margin-bottom: 24px; text-align: center; }
+
+        /* Form Elements */
+        input, select { 
+            width: 100%; 
+            background: var(--secondary); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px; 
+            border-radius: 12px; 
+            color: white; 
+            margin-bottom: 12px;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            border-radius: 12px; 
+            border: none; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-main { background: var(--accent); color: black; }
+        .btn-main:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* Key List */
+        .list-header { margin-top: 40px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px; font-size: 14px; color: var(--text-dim); }
+        .key-item { 
+            padding: 20px 0; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .key-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .key-name { font-weight: 600; color: var(--accent); }
+        .key-date { font-size: 12px; color: var(--text-dim); }
+
+        /* Controls */
+        .control-group { display: flex; gap: 8px; align-items: center; }
+        .input-mini { width: 60px; margin: 0; padding: 8px; text-align: center; }
+        
+        .btn-tool { width: auto; padding: 8px 12px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-tool:hover { background: rgba(255,255,255,0.15); }
+        .btn-del { color: var(--danger); border-color: rgba(255, 59, 48, 0.2); }
+        .btn-del:hover { background: rgba(255, 59, 48, 0.1); }
+
+        #toast { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: white; color: black; padding: 12px 24px; border-radius: 40px; font-size: 12px; font-weight: 600; z-index: 100; }
     </style>
 </head>
 <body>
 
+<div id="toast">บันทึกเรียบร้อย</div>
+
 <div class="container">
     <div id="login-screen" class="card">
-        <h2>ADMIN LOGIN</h2>
-        <input type="password" id="adminPass" placeholder="กรอกรหัสผ่านแอดมิน">
-        <button onclick="checkLogin()">เข้าสู่ระบบ</button>
+        <h2>Authentication</h2>
+        <input type="password" id="adminPass" placeholder="Admin Password">
+        <button class="btn-main" onclick="checkLogin()">Login</button>
     </div>
 
-    <div id="dashboard" class="card">
-        <h2>KEY GENERATOR</h2>
-        <select id="duration">
-            <option value="1">1 วัน</option>
-            <option value="7">7 วัน</option>
-            <option value="30">30 วัน</option>
-        </select>
-        <button id="genBtn" onclick="generateAndSave()">สร้าง Key ใหม่</button>
-        <div id="result-popup"></div>
-
-        <div class="key-list">
-            <h3>Keys ในระบบ</h3>
-            <div id="list-container">กำลังโหลด...</div>
+    <div id="dashboard" style="display:none;">
+        <div class="card">
+            <h2>New Key</h2>
+            <select id="duration">
+                <option value="1">1 Day</option>
+                <option value="7">7 Days</option>
+                <option value="30">30 Days</option>
+            </select>
+            <button class="btn-main" onclick="generateAndSave()">Generate</button>
         </div>
-        
-        <button class="btn-outline" onclick="location.reload()">ออกจากระบบ</button>
+
+        <div class="list-header">Active Keys</div>
+        <div id="list-container">Loading...</div>
     </div>
 </div>
 
 <script>
     const DB_URL = "https://jood-af2d8-default-rtdb.asia-southeast1.firebasedatabase.app/keys";
     const DB_SECRET = "JXRzMTiI2hQo9rps823i8guY5y14fxWPUeFDO5oU";
-    const ADMIN_PASSWORD = "2012"; // เปลี่ยนรหัสผ่านตรงนี้
+    const ADMIN_PASS = "1234"; // เปลี่ยนรหัสผ่านตรงนี้
 
     function checkLogin() {
-        const pass = document.getElementById('adminPass').value;
-        if (pass === ADMIN_PASSWORD) {
+        if (document.getElementById('adminPass').value === ADMIN_PASS) {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             fetchKeys();
-        } else {
-            alert("รหัสผ่านไม่ถูกต้อง!");
-        }
+        } else { alert("Wrong Password"); }
     }
 
-    function makeid(length) {
-        let result = 'JOOD-';
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        for (let i = 0; i < length; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-            if (i === 3) result += '-';
-        }
-        return result;
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg; t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 2000);
     }
 
-    // ดึงข้อมูล Key ทั้งหมดมาโชว์
     async function fetchKeys() {
         const container = document.getElementById('list-container');
         try {
-            const response = await fetch(`${DB_URL}.json?auth=${DB_SECRET}`);
-            const data = await response.json();
+            const res = await fetch(`${DB_URL}.json?auth=${DB_SECRET}`);
+            const data = await res.json();
             container.innerHTML = "";
 
-            if (!data) {
-                container.innerHTML = "ไม่พบ Key ในระบบ";
-                return;
-            }
+            if (!data) { container.innerHTML = "<p style='color:#555;text-align:center;'>No keys found</p>"; return; }
 
-            for (let key in data) {
-                const item = data[key];
-                const dateStr = new Date(item.expiry * 1000).toLocaleDateString();
+            for (let id in data) {
+                const item = data[id];
+                const date = new Date(item.expiry * 1000).toLocaleDateString('th-TH');
                 
                 const div = document.createElement('div');
                 div.className = 'key-item';
                 div.innerHTML = `
-                    <div class="key-info">
-                        <b>${key}</b>
-                        <span>หมดอายุ: ${dateStr}</span>
+                    <div class="key-header">
+                        <span class="key-name">${id}</span>
+                        <span class="key-date">Expire: ${date}</span>
                     </div>
-                    <div class="actions">
-                        <button onclick="addTime('${key}', ${item.expiry})">+1 วัน</button>
-                        <button class="btn-danger" onclick="deleteKey('${key}')">ลบ</button>
+                    <div class="control-group">
+                        <input type="number" class="input-mini" id="val-${id}" value="1">
+                        <button class="btn-tool" onclick="updateTime('${id}', ${item.expiry}, 'add')">Add Days</button>
+                        <button class="btn-tool" onclick="updateTime('${id}', ${item.expiry}, 'sub')">Sub Days</button>
+                        <div style="flex-grow:1"></div>
+                        <button class="btn-tool btn-del" onclick="deleteKey('${id}')">Delete</button>
                     </div>
                 `;
                 container.appendChild(div);
             }
-        } catch (e) { container.innerHTML = "โหลดข้อมูลล้มเหลว"; }
+        } catch (e) { container.innerHTML = "Error loading data"; }
     }
 
     async function generateAndSave() {
-        const days = document.getElementById('duration').value;
-        const newKey = makeid(8);
-        const expiry = Math.floor(Date.now() / 1000) + (days * 24 * 60 * 60);
+        const days = parseInt(document.getElementById('duration').value);
+        const key = 'JOOD-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        const expiry = Math.floor(Date.now() / 1000) + (days * 86400);
 
-        await fetch(`${DB_URL}/${newKey}.json?auth=${DB_SECRET}`, {
+        await fetch(`${DB_URL}/${key}.json?auth=${DB_SECRET}`, {
             method: 'PUT',
             body: JSON.stringify({ expiry: expiry, duration: days + " Days" })
         });
-        
-        const res = document.getElementById('result-popup');
-        res.innerText = "สร้างสำเร็จ: " + newKey;
-        res.style.display = "block";
-        setTimeout(() => res.style.display = "none", 3000);
-        
+        showToast("Key Generated");
         fetchKeys();
     }
 
-    async function addTime(key, currentExpiry) {
-        const newExpiry = currentExpiry + (24 * 60 * 60); // เพิ่ม 1 วัน
+    async function updateTime(key, currentExpiry, mode) {
+        const input = document.getElementById(`val-${key}`);
+        const days = parseInt(input.value) || 0;
+        const seconds = days * 86400;
+        const newExpiry = mode === 'add' ? currentExpiry + seconds : currentExpiry - seconds;
+
         await fetch(`${DB_URL}/${key}/expiry.json?auth=${DB_SECRET}`, {
             method: 'PUT',
             body: JSON.stringify(newExpiry)
         });
+        showToast("Updated " + key);
         fetchKeys();
     }
 
     async function deleteKey(key) {
-        if (confirm("ยืนยันการลบ Key: " + key)) {
+        if (confirm("Delete " + key + " permanently?")) {
             await fetch(`${DB_URL}/${key}.json?auth=${DB_SECRET}`, { method: 'DELETE' });
+            showToast("Key Deleted");
             fetchKeys();
         }
     }
