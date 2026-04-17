@@ -3,69 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jood Key Manager</title>
+    <title>JOOD | Advanced Key Manager</title>
     <style>
-        :root { --primary: #2563eb; --bg: #f8fafc; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px; }
-        h2 { margin-top: 0; color: #1e293b; text-align: center; }
-        label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: #64748b; }
-        input, select { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; box-sizing: border-box; }
-        button { width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
-        button:hover { opacity: 0.9; }
-        .result { margin-top: 1.5rem; padding: 1rem; background: #f1f5f9; border-radius: 0.5rem; display: none; word-break: break-all; }
-        .key-text { color: var(--primary); font-weight: bold; font-size: 1.1rem; }
+        :root {
+            --bg: #0b0f1a;
+            --card-bg: #161b2a;
+            --text: #e2e8f0;
+            --primary: #3b82f6;
+            --danger: #ef4444;
+            --accent: #10b981;
+            --border: #2d3748;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid var(--border);
+        }
+
+        h2 { text-align: center; color: var(--primary); margin-bottom: 2rem; }
+
+        .section {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: #94a3b8; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: #0b0f1a;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: white;
+            box-sizing: border-box;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-danger { background: var(--danger); color: white; margin-top: 5px; }
+        
+        .key-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #0b0f1a;
+            padding: 10px;
+            border-radius: 0.5rem;
+        }
+
+        .key-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #2d3748;
+            font-size: 0.9rem;
+        }
+
+        .json-output {
+            background: #000;
+            color: #10b981;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Jood Key Generator</h2>
-    <label>Admin Password</label>
-    <input type="password" id="adminPass" placeholder="รหัสเจ้าของ">
-    
-    <label>อายุการใช้งาน</label>
-    <select id="duration">
-        <option value="7">7 วัน (Weekly)</option>
-        <option value="30">1 เดือน (Monthly)</option>
-    </select>
+<div class="container">
+    <h2>JOOD Key Management</h2>
 
-    <button onclick="generateKey()">สร้าง Key ใหม่</button>
+    <div class="section">
+        <label>1. วางเนื้อหาจาก keys.json เดิม (ถ้ามี)</label>
+        <textarea id="rawJson" placeholder='{"KEY-1": {"expiry": 123}}' rows="3"></textarea>
+        <button class="btn-primary" style="background:#6366f1" onclick="importJson()">Load Data</button>
+    </div>
 
-    <div id="resultBox" class="result">
-        <label>สร้างสำเร็จ! ก๊อปปี้ด้านล่างนี้:</label>
-        <div id="keyDisplay" class="key-text"></div>
-        <small id="expiryDisplay" style="color: #94a3b8;"></small>
+    <div class="section">
+        <label>2. สร้าง Key ใหม่</label>
+        <select id="duration">
+            <option value="7">7 วัน (Weekly)</option>
+            <option value="30">30 วัน (Monthly)</option>
+        </select>
+        <button class="btn-primary" onclick="addKey()">+ Generate & Add</button>
+    </div>
+
+    <div class="section">
+        <label>3. รายการ Key ในระบบ (คลิกลบได้ที่ถังขยะ)</label>
+        <div id="keyList" class="key-list">
+            <p style="text-align:center; color:#4a5568;">ไม่มีข้อมูล</p>
+        </div>
+    </div>
+
+    <div>
+        <label>4. ก๊อปปี้ค่านี้กลับไปเซฟที่ GitHub</label>
+        <div id="finalJson" class="json-output">{}</div>
+        <button class="btn-primary" style="background:var(--accent); margin-top:10px;" onclick="copyResult()">Copy New JSON</button>
     </div>
 </div>
 
 <script>
-    // ตั้งรหัสผ่านเจ้าของตรงนี้
-    const OWNER_SECRET = "JOOD2026"; 
+    let currentData = {};
 
-    function generateKey() {
-        const pass = document.getElementById('adminPass').value;
-        if (pass !== OWNER_SECRET) {
-            alert("รหัสผ่านไม่ถูกต้อง!");
-            return;
+    function updateDisplay() {
+        const listDiv = document.getElementById('keyList');
+        const finalJson = document.getElementById('finalJson');
+        listDiv.innerHTML = '';
+
+        if (Object.keys(currentData).length === 0) {
+            listDiv.innerHTML = '<p style="text-align:center; color:#4a5568;">ไม่มีข้อมูล</p>';
         }
 
-        const days = parseInt(document.getElementById('duration').value);
-        const randomStr = Math.random().toString(36).substring(2, 12).toUpperCase();
-        const key = "JOOD-" + randomStr;
-        
-        // คำนวณเวลาหมดอายุ (Timestamp)
-        const now = new Date();
-        const expiryDate = new Date(now.getTime() + (days * 24 * 60 * 60 * 1000));
-        
-        // แสดงผล
-        document.getElementById('resultBox').style.display = 'block';
-        document.getElementById('keyDisplay').innerText = key;
-        document.getElementById('expiryDisplay').innerText = "หมดอายุวันที่: " + expiryDate.toLocaleString();
+        for (let key in currentData) {
+            const expiry = new Date(currentData[key].expiry * 1000).toLocaleDateString();
+            const item = document.createElement('div');
+            item.className = 'key-item';
+            item.innerHTML = `
+                <span><b>${key}</b> <small>(${expiry})</small></span>
+                <button class="btn-danger" style="width:auto; padding:5px 10px;" onclick="deleteKey('${key}')">ลบ</button>
+            `;
+            listDiv.appendChild(item);
+        }
 
-        // หมายเหตุ: ในขั้นตอนนี้คุณต้องส่งค่า 'key' และ 'expiryDate.getTime()' ไปเก็บใน Database ของคุณ
-        console.log("บันทึกข้อมูล:", { key: key, expires: expiryDate.getTime() });
-        alert("สร้าง Key แล้ว! (อย่าลืมนำไปเพิ่มในระบบ Database ของคุณ)");
+        finalJson.innerText = JSON.stringify(currentData, null, 2);
+    }
+
+    function importJson() {
+        try {
+            const val = document.getElementById('rawJson').value;
+            currentData = val ? JSON.parse(val) : {};
+            updateDisplay();
+            alert("โหลดข้อมูลสำเร็จ!");
+        } catch(e) {
+            alert("รูปแบบ JSON ไม่ถูกต้อง!");
+        }
+    }
+
+    function addKey() {
+        const days = parseInt(document.getElementById('duration').value);
+        const key = "JOOD-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+        const expiry = Math.floor(Date.now() / 1000) + (days * 24 * 60 * 60);
+        
+        currentData[key] = { expiry: expiry };
+        updateDisplay();
+    }
+
+    function deleteKey(key) {
+        if (confirm(`ยืนยันการลบ Key: ${key}?`)) {
+            delete currentData[key];
+            updateDisplay();
+        }
+    }
+
+    function copyResult() {
+        const text = document.getElementById('finalJson').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert("คัดลอก JSON ใหม่แล้ว! นำไปวางทับในไฟล์ keys.json บน GitHub ได้เลย");
+        });
     }
 </script>
 
