@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jood Admin</title>
+    <title>JOOD | Premium Admin</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
         
         :root {
-            --bg: #f5f5f7;
-            --card: #ffffff;
+            --bg: #ffffff;
+            --surface: #f8f9fa;
             --primary: #000000;
-            --accent: #0071e3;
+            --accent: #007aff;
             --danger: #ff3b30;
-            --text-main: #1d1d1f;
-            --text-dim: #86868b;
+            --border: rgba(0, 0, 0, 0.08);
+            --shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
         }
 
         body { 
-            font-family: 'Inter', sans-serif; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
             background: var(--bg); 
-            color: var(--text-main); 
+            color: var(--primary); 
             margin: 0; 
             display: flex; 
             justify-content: center; 
@@ -28,92 +28,126 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        .container { width: 100%; max-width: 450px; }
+        .container { width: 100%; max-width: 420px; margin-top: 40px; }
         
-        /* White Minimal Card */
+        /* Premium Minimal Card */
         .card { 
-            background: var(--card); 
-            padding: 24px; 
-            border-radius: 20px; 
-            box-shadow: 0 8px 24px rgba(0,0,0,0.04);
-            border: 1px solid rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            background: var(--surface); 
+            padding: 32px; 
+            border-radius: 28px; 
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
         }
 
-        h2 { font-weight: 600; letter-spacing: -0.5px; margin-bottom: 20px; text-align: center; font-size: 20px; }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, #000, #444);
+            opacity: 0.8;
+        }
+
+        h2 { 
+            font-weight: 800; 
+            letter-spacing: -1px; 
+            margin-bottom: 24px; 
+            text-align: left; 
+            font-size: 24px; 
+            text-transform: uppercase;
+        }
+
+        label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #888; margin-left: 4px; }
 
         input, select { 
             width: 100%; 
-            background: #fbfbfd; 
-            border: 1px solid #d2d2d7;
-            padding: 12px; 
-            border-radius: 10px; 
-            color: var(--text-main); 
-            margin-bottom: 10px;
-            font-size: 16px; /* ป้องกัน iOS ซูมเข้าตอนพิมพ์ */
+            background: #fff; 
+            border: 1px solid var(--border);
+            padding: 14px 18px; 
+            border-radius: 16px; 
+            color: var(--primary); 
+            margin: 8px 0 16px 0;
+            font-size: 16px;
             box-sizing: border-box;
             outline: none;
-            transition: border 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        input:focus { border-color: var(--accent); }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(0,0,0,0.03); }
 
         button { 
             width: 100%; 
-            padding: 12px; 
-            border-radius: 10px; 
+            padding: 16px; 
+            border-radius: 16px; 
             border: none; 
-            font-weight: 600; 
+            font-weight: 700; 
             cursor: pointer; 
-            transition: all 0.2s;
+            transition: all 0.3s ease;
             font-size: 14px;
+            letter-spacing: 0.5px;
         }
 
         .btn-main { background: var(--primary); color: white; }
-        .btn-main:active { transform: scale(0.98); }
+        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .btn-main:active { transform: scale(0.96); }
 
-        /* Key List Styling */
+        /* Key List Styling - Cool List */
         .key-item { 
-            background: var(--card);
-            padding: 16px;
-            border-radius: 16px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(0,0,0,0.05);
+            background: #fff;
+            padding: 20px;
+            border-radius: 24px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease;
+        }
+        .key-item:hover { transform: scale(1.02); }
+
+        .key-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .key-name { font-weight: 800; font-size: 16px; letter-spacing: -0.5px; }
+        .countdown { 
+            font-size: 11px; 
+            color: white; 
+            background: var(--primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700; 
         }
 
-        .key-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-        .key-name { font-weight: 600; font-size: 15px; color: var(--primary); }
-        .countdown { font-size: 12px; color: var(--accent); font-weight: 600; font-family: monospace; }
-
-        /* Mobile Friendly Controls */
-        .control-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-        .input-mini { width: 50px !important; margin: 0 !important; padding: 6px !important; text-align: center; font-size: 14px !important; }
+        /* Control Group Layout */
+        .control-group { display: flex; gap: 6px; align-items: center; }
+        .input-mini { width: 60px !important; margin: 0 !important; padding: 10px !important; text-align: center; font-weight: 700; border-radius: 12px !important; }
         
-        .btn-tool { width: auto; flex: 1; padding: 8px; background: #f5f5f7; color: var(--text-main); border: 1px solid #d2d2d7; }
-        .btn-del { color: var(--danger); border-color: #ffdada; background: #fff5f5; }
+        .btn-tool { width: auto; flex: 1; padding: 12px; background: #fff; color: var(--primary); border: 1px solid var(--border); border-radius: 12px; font-size: 11px; }
+        .btn-tool:hover { background: #000; color: #fff; }
+        .btn-del { color: var(--danger); border: 1px solid rgba(255, 59, 48, 0.1); background: rgba(255, 59, 48, 0.03); }
+        .btn-del:hover { background: var(--danger); color: white; border-color: var(--danger); }
 
-        #toast { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 30px; font-size: 13px; z-index: 1000; }
+        #toast { display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #000; color: #fff; padding: 12px 28px; border-radius: 50px; font-size: 13px; font-weight: 600; z-index: 1000; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
 
-<div id="toast">บันทึกเรียบร้อย</div>
+<div id="toast">SYSTEM UPDATED</div>
 
 <div class="container">
     <div id="login-screen" class="card">
-        <h2>Admin Panel</h2>
-        <input type="password" id="adminPass" placeholder="Password">
-        <button class="btn-main" onclick="checkLogin()">Login</button>
+        <h2>Auth System</h2>
+        <label>Access Code</label>
+        <input type="password" id="adminPass" placeholder="••••">
+        <button class="btn-main" onclick="checkLogin()">IDENTIFY</button>
     </div>
 
     <div id="dashboard" style="display:none;">
         <div class="card">
-            <h2>New Key</h2>
+            <h2>Generate</h2>
+            <label>Validity Period</label>
             <select id="duration">
-                <option value="1">1 วัน</option>
-                <option value="7">7 วัน</option>
-                <option value="30">30 วัน</option>
+                <option value="1">1 DAY ACCESS</option>
+                <option value="7">7 DAYS ACCESS</option>
+                <option value="30">30 DAYS ACCESS</option>
             </select>
-            <button class="btn-main" onclick="generateAndSave()">สร้าง Key</button>
+            <button class="btn-main" onclick="generateAndSave()">CREATE NEW KEY</button>
         </div>
 
         <div id="list-container"></div>
@@ -132,7 +166,7 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             startDataSync();
-        } else { alert("รหัสผ่านไม่ถูกต้อง"); }
+        } else { alert("ACCESS DENIED"); }
     }
 
     function showToast(msg) {
@@ -141,7 +175,6 @@
         setTimeout(() => t.style.display = 'none', 2000);
     }
 
-    // ฟังก์ชันนับถอยหลัง
     function getCountdown(expiry) {
         const now = Math.floor(Date.now() / 1000);
         const diff = expiry - now;
@@ -150,7 +183,7 @@
         const h = Math.floor((diff % 86400) / 3600);
         const m = Math.floor((diff % 3600) / 60);
         const s = diff % 60;
-        return `${d}d ${h}h ${m}m ${s}s`;
+        return `${d}D ${h}H ${m}M ${s}S`;
     }
 
     async function fetchKeys() {
@@ -168,10 +201,8 @@
 
         for (let id in allKeys) {
             const item = allKeys[id];
-            
-            // เงื่อนไข: ถ้าหมดอายุ (ต่ำกว่าเวลาปัจจุบัน) ให้ลบออกจาก Firebase ทันที
             if (item.expiry <= now) {
-                deleteKey(id, true); // ลบแบบเงียบๆ
+                deleteKey(id, true);
                 continue;
             }
 
@@ -184,30 +215,29 @@
                 </div>
                 <div class="control-group">
                     <input type="number" class="input-mini" id="val-${id}" value="1">
-                    <button class="btn-tool" onclick="updateTime('${id}', ${item.expiry}, 'add')">+ วัน</button>
-                    <button class="btn-tool" onclick="updateTime('${id}', ${item.expiry}, 'sub')">- วัน</button>
-                    <button class="btn-tool btn-del" onclick="deleteKey('${id}')">ลบถาวร</button>
+                    <button class="btn-tool" onclick="updateTime('${id}', ${item.expiry}, 'add')">ADD</button>
+                    <button class="btn-tool" onclick="updateTime('${id}', ${item.expiry}, 'sub')">SUB</button>
+                    <button class="btn-tool btn-del" onclick="deleteKey('${id}')">DEL</button>
                 </div>
             `;
             container.appendChild(div);
         }
     }
 
-    // อัปเดตตัวเลขถอยหลังทุกวินาที
     setInterval(() => {
         for (let id in allKeys) {
             const el = document.getElementById(`timer-${id}`);
             if (el) {
                 const timeStr = getCountdown(allKeys[id].expiry);
                 el.innerText = timeStr;
-                if (timeStr === "EXPIRED") fetchKeys(); // รีเฟรชเพื่อลบ Key ออก
+                if (timeStr === "EXPIRED") fetchKeys();
             }
         }
     }, 1000);
 
     async function startDataSync() {
         await fetchKeys();
-        setInterval(fetchKeys, 10000); // ดึงข้อมูลใหม่ทุก 10 วินาที
+        setInterval(fetchKeys, 8000);
     }
 
     async function generateAndSave() {
@@ -219,7 +249,7 @@
             method: 'PUT',
             body: JSON.stringify({ expiry: expiry })
         });
-        showToast("สร้าง Key สำเร็จ");
+        showToast("NEW KEY CREATED");
         fetchKeys();
     }
 
@@ -231,14 +261,14 @@
             method: 'PUT',
             body: JSON.stringify(newExpiry)
         });
-        showToast("อัปเดตเวลาสำเร็จ");
+        showToast("DATA UPDATED");
         fetchKeys();
     }
 
     async function deleteKey(key, silent = false) {
-        if (!silent && !confirm("ยืนยันการลบ " + key)) return;
+        if (!silent && !confirm("PERMANENTLY DELETE " + key + "?")) return;
         await fetch(`${DB_URL}/${key}.json?auth=${DB_SECRET}`, { method: 'DELETE' });
-        if (!silent) showToast("ลบ Key แล้ว");
+        if (!silent) showToast("KEY REMOVED");
         fetchKeys();
     }
 </script>
