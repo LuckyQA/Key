@@ -17,6 +17,7 @@
             --danger: #ef4444;
             --success: #10b981;
             --input-bg: rgba(255, 255, 255, 0.03);
+            --admin-gold: #fbbf24;
         }
 
         * { 
@@ -139,6 +140,7 @@
         
         .hwid-status { font-size: 11px; color: var(--text-dim); display: flex; flex-direction: column; gap: 2px; }
         .user-tag { color: var(--accent); font-weight: 500; font-size: 10px; background: rgba(99, 102, 241, 0.1); padding: 4px 8px; border-radius: 6px; width: fit-content; margin-top: 4px; }
+        .status-unlimited { color: var(--admin-gold); font-weight: bold; }
 
         .key-timer { 
             font-size: 11px; font-weight: 500; 
@@ -187,6 +189,7 @@
                     <div onclick="setDuration(7, '7 Days Access')">7 Days Access</div>
                     <div onclick="setDuration(30, '30 Days Access')">30 Days Access</div>
                     <div onclick="setDuration(99999, 'Lifetime Access (INF)')">Lifetime Access (INF)</div>
+                    <div onclick="setDuration('ADMIN', '⭐ Admin Key (??- No Limit)')" style="color: #fbbf24; border-top: 1px solid rgba(255,255,255,0.1)">⭐ Admin Key (??- No Limit)</div>
                 </div>
             </div>
             <button class="btn-primary" onclick="generateAndSave()">Generate New Key</button>
@@ -278,7 +281,6 @@
             }
         });
 
-        // Filter keys based on search term
         const filteredKeys = Object.keys(allKeys).reverse().filter(id => {
             const userInfo = keyToUserInfo[id];
             const userName = userInfo ? userInfo.name.toLowerCase() : "";
@@ -287,7 +289,8 @@
 
         filteredKeys.forEach(id => {
             const item = allKeys[id];
-            const hasHWID = item.hwid && item.hwid !== "";
+            const isUnlimited = item.hwid === "NONE";
+            const hasHWID = item.hwid && item.hwid !== "" && item.hwid !== "NONE";
             const userInfo = keyToUserInfo[id];
             
             const div = document.createElement('div');
@@ -297,7 +300,9 @@
                     <div>
                         <span class="key-id">${id}</span>
                         <div class="hwid-status">
-                            <span>${hasHWID ? '🔒 Locked' : '🔓 Available'}</span>
+                            <span class="${isUnlimited ? 'status-unlimited' : ''}">
+                                ${isUnlimited ? '🔓 UNLIMITED (ADMIN)' : (hasHWID ? '🔒 Locked' : '🔓 Available')}
+                            </span>
                             ${userInfo ? `<span class="user-tag">👤 ${userInfo.name}</span>` : ''}
                         </div>
                     </div>
@@ -307,7 +312,7 @@
                     <input type="number" class="input-qty" id="val-${id}" value="1">
                     <button class="btn-sm" onclick="updateTime('${id}', ${item.expiry}, 'add')">+ D</button>
                     <button class="btn-sm" onclick="updateTime('${id}', ${item.expiry}, 'sub')">- D</button>
-                    <button class="btn-sm btn-reset" title="Reset HWID" onclick="resetHWID('${id}')">↺</button>
+                    <button class="btn-sm btn-reset" title="Reset HWID" onclick="resetHWID('${id}')" ${isUnlimited ? 'disabled style="opacity:0.3"' : ''}>↺</button>
                     <button class="btn-sm btn-del" title="Delete Key" onclick="deleteKey('${id}')">✕</button>
                 </div>`;
             container.appendChild(div);
@@ -330,14 +335,27 @@
     }, 1000);
 
     async function generateAndSave() {
-        const key = 'QA-' + Math.random().toString(36).substring(2, 7).toUpperCase();
-        let expiry = (currentDuration === 99999) ? 3000000000 : Math.floor(Date.now() / 1000) + (currentDuration * 86400);
+        // เปลี่ยน Prefix เป็น ??- ถ้าเลือก ADMIN
+        const prefix = currentDuration === 'ADMIN' ? '??-' : 'QA-';
+        const key = prefix + Math.random().toString(36).substring(2, 7).toUpperCase();
+        
+        let expiry;
+        let hwidValue = "";
+
+        if (currentDuration === 'ADMIN') {
+            expiry = 3000000000; // Lifetime
+            hwidValue = "NONE";  // ตั้งเป็น NONE เพื่อให้โปรแกรมข้ามการเช็คเครื่อง
+        } else {
+            expiry = (currentDuration === 99999) ? 3000000000 : Math.floor(Date.now() / 1000) + (currentDuration * 86400);
+            hwidValue = "";
+        }
 
         await fetch(`${BASE_URL}/keys/${key}.json?auth=${DB_SECRET}`, { 
             method: 'PUT', 
-            body: JSON.stringify({ expiry: expiry, hwid: "" }) 
+            body: JSON.stringify({ expiry: expiry, hwid: hwidValue }) 
         });
-        showToast("Key Generated"); fetchKeys();
+        showToast(currentDuration === 'ADMIN' ? "Admin Key Generated" : "Key Generated"); 
+        fetchKeys();
     }
 
     async function updateTime(key, currentExpiry, mode) {
