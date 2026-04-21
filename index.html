@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Key</title>
+    <title>Key Management System</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
         
@@ -111,6 +111,7 @@
         .key-info { display: flex; justify-content: space-between; align-items: start; margin-bottom: 14px; }
         .key-id { font-weight: 600; color: #fff; display: block; margin-bottom: 4px; }
         .status-unlimited { color: var(--admin-gold); font-weight: bold; }
+        .status-waiting { color: #60a5fa; font-size: 11px; }
         .key-timer { font-size: 11px; color: var(--accent); background: rgba(99, 102, 241, 0.1); padding: 4px 10px; border-radius: 8px; }
 
         .actions { display: grid; grid-template-columns: 45px 1fr 1fr 38px 38px; gap: 6px; }
@@ -205,9 +206,16 @@
         setTimeout(() => t.style.display = 'none', 2000);
     }
 
-    function getCountdown(expiry) {
-        if (expiry > 2500000000) return "∞ INFINITE";
-        const diff = expiry - Math.floor(Date.now() / 1000);
+    function getCountdown(item) {
+        if (item.expiry > 2500000000) return "∞ INFINITE";
+        
+        // ถ้าสถานะยังเป็น waiting ให้แสดงจำนวนวันที่ตั้งไว้
+        if (item.status === "waiting") {
+            const days = Math.floor(item.expiry / 86400);
+            return `WAITING (${days}D)`;
+        }
+
+        const diff = item.expiry - Math.floor(Date.now() / 1000);
         if (diff <= 0) return "EXPIRED";
         const d = Math.floor(diff / 86400), h = Math.floor((diff % 86400) / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
         return (d > 0 ? d + "d " : "") + `${h}h ${m}m ${s}s`;
@@ -256,15 +264,16 @@
                             <span class="${isUnlimited ? 'status-unlimited' : ''}">
                                 ${isUnlimited ? '🔓 UNLIMITED' : (hasHWID ? '🔒 Locked' : '🔓 Available')}
                             </span>
+                            ${item.status === 'waiting' ? '<span class="status-waiting"> | ⏳ Not Started</span>' : ''}
                             ${user ? ` | 👤 ${user.name}` : ''}
                         </div>
                     </div>
-                    <span class="key-timer" id="timer-${id}">${getCountdown(item.expiry)}</span>
+                    <span class="key-timer" id="timer-${id}">${getCountdown(item)}</span>
                 </div>
                 <div class="actions">
                     <input type="number" class="input-qty" id="val-${id}" value="1">
-                    <button class="btn-sm" onclick="updateTime('${id}', ${item.expiry}, 'add')">+ D</button>
-                    <button class="btn-sm" onclick="updateTime('${id}', ${item.expiry}, 'sub')">- D</button>
+                    <button class="btn-sm" onclick="updateTime('${id}', ${item.expiry}, 'add', '${item.status}')">+ D</button>
+                    <button class="btn-sm" onclick="updateTime('${id}', ${item.expiry}, 'sub', '${item.status}')">- D</button>
                     <button class="btn-sm btn-reset" onclick="resetHWID('${id}')" ${isUnlimited ? 'disabled style="opacity:0.2"' : ''}>↺</button>
                     <button class="btn-sm btn-del" onclick="deleteKey('${id}')">✕</button>
                 </div>`;
@@ -276,17 +285,27 @@
         const prefix = currentDuration === 'ADMIN' ? 'OW-' : 'QA-';
         const key = prefix + Math.random().toString(36).substring(2, 7).toUpperCase();
         
-        let expiry = (currentDuration === 'ADMIN' || currentDuration === 99999) ? 3000000000 : Math.floor(Date.now() / 1000) + (currentDuration * 86400);
-        let hwid = currentDuration === 'ADMIN' ? "NONE" : "";
+        let expiry;
+        let status = "waiting";
+        let hwid = "";
+
+        if (currentDuration === 'ADMIN' || currentDuration === 99999) {
+            expiry = 3000000000;
+            status = "active"; // Admin/LifeTime ให้ active เลย
+            if(currentDuration === 'ADMIN') hwid = "NONE";
+        } else {
+            // เก็บเป็นจำนวนวินาที (เช่น 1 วัน = 86400 วินาที)
+            expiry = currentDuration * 86400;
+        }
 
         await fetch(`${BASE_URL}/keys/${key}.json?auth=${DB_SECRET}`, { 
-            method: 'PUT', body: JSON.stringify({ expiry, hwid }) 
+            method: 'PUT', body: JSON.stringify({ expiry, hwid, status }) 
         });
         showToast("Key Generated: " + key);
         fetchKeys();
     }
 
-    async function updateTime(key, cur, mode) {
+    async function updateTime(key, cur, mode, status) {
         const days = parseInt(document.getElementById(`val-${key}`).value) || 0;
         let expiry = mode === 'add' ? cur + (days * 86400) : cur - (days * 86400);
         await fetch(`${BASE_URL}/keys/${key}/expiry.json?auth=${DB_SECRET}`, { method: 'PUT', body: JSON.stringify(expiry) });
@@ -307,11 +326,10 @@
 
     function startDataSync() { fetchKeys(); setInterval(fetchKeys, 15000); }
     
-    // อัปเดต Timer ทุกวินาที
     setInterval(() => {
         for (let id in allKeys) {
             const el = document.getElementById(`timer-${id}`);
-            if (el) el.innerText = getCountdown(allKeys[id].expiry);
+            if (el) el.innerText = getCountdown(allKeys[id]);
         }
     }, 1000);
 </script>
